@@ -2,8 +2,7 @@
 
 This repository contains the R programming scripts for an econometric analysis evaluating the impact of drought intensity on county-level corn and soybean yields across the United States from 1990 to 2019. 
 
-The empirical framework utilizes spatial data processing to map localized climate indices to agricultural boundaries, estimating panel regressions that account for heterogeneity in agricultural dependence, irrigation infrastructure, and irrigation water sources. Complete methodological background and data descriptions can be referenced in the accompanying `readme.docx` file.
-
+The empirical framework utilizes spatial data processing to map localized climate indices to agricultural boundaries, estimating panel regressions that account for heterogeneity in agricultural dependence, irrigation infrastructure, and irrigation water sources. 
 ---
 
 ## Data & Sample Selection
