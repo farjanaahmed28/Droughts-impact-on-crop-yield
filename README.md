@@ -3,6 +3,7 @@
 This repository contains the R programming scripts for an econometric analysis evaluating the impact of drought intensity on county-level corn and soybean yields across the United States from 1990 to 2019. 
 
 The empirical framework utilizes spatial data processing to map localized climate indices to agricultural boundaries, estimating panel regressions that account for heterogeneity in agricultural dependence, irrigation infrastructure, and irrigation water sources. 
+
 ---
 
 ## Data & Sample Selection
@@ -15,16 +16,15 @@ The empirical framework utilizes spatial data processing to map localized climat
 ## Spatial & Climate Data Integration
 
 ### 1. Variables and Metrics
-* **Crop Yield Data:** Annual county-level corn and soybean production and harvested acreage sourced from the **USDA National Agricultural Statistics Service (USDA-NASS)**[cite: 1]. Yield ($x_{it}$) is defined as total production divided by harvested acres[cite: 1].
-* **Drought Metric Construction:** High-resolution 10-day **Palmer Drought Severity Index (PDSI)** data sourced from gridMET[cite: 1]. 
-* **Spatial Processing:** Using the **2008 National Land Cover Database (NLCD)** and **2008 TIGER/Line shapefiles**, PDSI values were extracted at a 10-day resolution and overlaid with cultivated cropland boundaries[cite: 1].
-* **Drought Intensity Classification:** Following the **U.S. Drought Monitor (USDM)** standards, continuous PDSI values were binned into five discrete daily risk exposure categories[cite: 1]:
-  * **D0 (Abnormally Dry):** $-1.0$ to $-1.9$[cite: 1]
-  * **D1 (Moderate):** $-2.0$ to $-2.9$[cite: 1]
-  * **D2 (Severe):** $-3.0$ to $-3.9$[cite: 1]
-  * **D3 (Extreme):** $-4.0$ to $-4.9$[cite: 1]
-  * **D4 (Exceptional):** $-5.0$ or less[cite: 1]
-  * *Metrics represent the annual average proportion of a county's cultivated cropland exposed to each respective category[cite: 1].*
+* **Crop Yield Data:** Annual county-level corn and soybean production and harvested acreage sourced from the **USDA National Agricultural Statistics Service (USDA-NASS)**. Yield ($x_{it}$) is defined as total production divided by harvested acres.
+* **Drought Metric Construction:** High-resolution 10-day **Palmer Drought Severity Index (PDSI)** data sourced from gridMET. 
+* **Spatial Processing:** Using the **2008 National Land Cover Database (NLCD)** and **2008 TIGER/Line shapefiles**, PDSI values were extracted at a 10-day resolution and overlaid with cultivated cropland boundaries.
+* **Drought Intensity Classification:** Following the **U.S. Drought Monitor (USDM)** standards, continuous PDSI values were binned into five discrete daily risk exposure categories (Metrics represent the annual average proportion of a county's cultivated cropland exposed to each respective category):
+  * **D0 (Abnormally Dry):** $-1.0$ to $-1.9$
+  * **D1 (Moderate Drought):** $-2.0$ to $-2.9$
+  * **D2 (Severe Drought):** $-3.0$ to $-3.9$
+  * **D3 (Extreme Drought):** $-4.0$ to $-4.9$
+  * **D4 (Exceptional Drought):** $-5.0$ or less
 
 ---
 
@@ -45,18 +45,26 @@ Where:
 
 ### Heterogeneity & Interaction Analysis
 To evaluate resilience and structural vulnerabilities, the framework extends the baseline model by including **interaction terms** across three socio-agricultural sub-samples:
-* **Agricultural Dependence:** Classifying counties based on the **USDA Economic Research Service (ERS) Typology Codes** (farming accounting for $\ge 25\%$ of earnings or $\ge 16\%$ of employment)[cite: 1].
-* **Irrigation Infrastructure:** Classifying a county as irrigated if the maximum observed ratio of irrigated-to-total harvested area exceeded $15\%$ across USDA Census years (1997–2017)[cite: 1].
-* **Water Source Vulnerability:** Partitioning irrigated counties by primary water source using **U.S. Geological Survey (USGS)** water-use data[cite: 1]. Counties are classified as *surface-water-dependent* if surface water withdrawals constitute $\ge 50\%$ of total irrigation withdrawals[cite: 1].
-
+* **Agricultural Dependence:** Classifying counties based on the **USDA Economic Research Service (ERS) Typology Codes** (farming accounting for $\ge 25\%$ of earnings or $\ge 16\%$ of employment).
+* **Irrigation Infrastructure:** Classifying a county as irrigated if the maximum observed ratio of irrigated-to-total harvested area exceeded $15\%$ across USDA Census years (1997–2017).
+* **Water Source Vulnerability:** Partitioning irrigated counties by primary water source using **U.S. Geological Survey (USGS)** water-use data. Counties are classified as *surface-water-dependent* if surface water withdrawals constitute $\ge 50\%$ of total irrigation withdrawals.
 ---
 
 ## Repository Structure
 
 ```text
-├── scripts/
-│   ├── 01_data_ingestion_cleaning.R   # Cleans USDA-NASS yields and structures USGS/ERS covariates
-│   ├── 02_spatial_pdsi_extraction.R   # Intersects gridMET NetCDF files with NLCD cropland grids
-│   ├── 03_drought_classification.R    # Bins PDSI metrics into annual county-level D0-D4 shares
-│   ├── 04_econometric_models.R        # Runs baseline panel models, Conley SEs, and interactions
+├── data_processing/
+│   ├── 01_Ag_depended_counties.R          # Cleans USDA-ERS typology codes for county agricultural dependence
+│   ├── 02_cropland_impacted_by_drought.R  # R-native spatial extraction of gridMET NetCDFs using exact_extract()
+│   ├── 03_gather_crop_yield.R             # Processes and normalizes raw county-level USDA-NASS corn and soy yields
+│   ├── 04_irrigated_harvested_cropland.R  # Compiles historical maximum ratiometric irrigation flags per county
+│   └── 05_irrigation_water_source.R       # Standardizes and builds USGS historical water withdrawal source matrices
+│
+├── econometrics/
+│   ├── 06_prepare_regression_dataset.R    # Stitches processed sub-panels into a final, clean FIPS-year master dataset
+│   ├── 07_conley_spatial_cutoff.R         # Computes pairwise Haversine distances across county centroids for SE lags
+│   └── 08_econometric_estimations.R       # Runs high-dimensional feols panel models with Conley SE spatial adjustments
+│
 └── README.md
+
+---
